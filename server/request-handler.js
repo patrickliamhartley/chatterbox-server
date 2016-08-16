@@ -12,15 +12,16 @@ this file and include it in basic-server.js so that it actually works.
 
 **************************************************************/
 var serverData = {results: [{
-    "createdAt":"2016-08-15T23:51:47.674Z",
-    "objectId":"qt43mO7IUZ",
-    "roomname":"lobby",
-    "text":"hola",
-    "updatedAt":"2016-08-15T23:51:47.674Z",
-    "username":"dnf"
-  }]};
+  createdAt: "2016-08-15T23:51:47.674Z",
+  objectId: "qt43mO7IUZ",
+  roomname: "lobby",
+  text: "hola",
+  updatedAt: "2016-08-15T23:51:47.674Z",
+  username: "dnf"
+}]};
 
 var requestHandler = function(request, response) {
+  console.log('request: ', request, 'response: ', response);
   // Request and Response come from node's http module.
   //
   // They include information about both the incoming request, such as
@@ -53,43 +54,47 @@ var requestHandler = function(request, response) {
   // which includes the status and all headers.
   response.writeHead(statusCode, headers);
   console.log('url', request.url);
-  var fakeData = {"results":[{
-    "roomname":"Lobby", 
-    "text":"LOL IM HAVING FUN!", 
-    "username":"MrCool"
+  var fakeData = {'results': [{
+    'roomname': 'Lobby', 
+    'text': 'LOL IM HAVING FUN!', 
+    'username': 'MrCool'
   }]};
 
   var stolenData = {
-    "createdAt":"2016-08-15T23:51:47.674Z",
-    "objectId":"qt43mO7IUZ",
-    "roomname":"lobby",
-    "text":"hola",
-    "updatedAt":"2016-08-15T23:51:47.674Z",
-    "username":"dnf"
+    'createdAt': '2016-08-15T23:51:47.674Z',
+    'objectId': 'qt43mO7IUZ',
+    'roomname': 'lobby',
+    'text': 'hola',
+    'updatedAt': '2016-08-15T23:51:47.674Z',
+    'username': 'dnf'
   };
-  var randoGen= function(){
-    return Math.floor(Math.random()*10000);
+  var randoGen = function() {
+    return Math.floor(Math.random() * 10000);
   };
 
-  // var serverData = {results: [stolenData]};
+  // handle request
+  if (request.url === '/classes/messages' && request.method === 'OPTIONS') {
+    statusCode = 200;
+    headers['Allow'] = 'HEAD,GET,PUT,DELETE,OPTIONS';
+    response.writeHead(statusCode, headers);
+    response.end('OK', statusCode);
 
-  if (request.url === '/classes/messages' && request.method === 'GET') {
-
-    console.log('request.url is true.');
-    // response.end(JSON.stringify(stolenData));
-    response.end(JSON.stringify(serverData));
+  } else if (request.url === '/classes/messages' && request.method === 'GET') {
+    statusCode = 200;
+    response.writeHead(statusCode, headers);
+    response.end(JSON.stringify(serverData), statusCode);
   } else if (request.url === '/classes/messages' && request.method === 'POST') {
-
     var arr = '';
     request.on('data', function(data) { arr += data; });
     
-    console.log('arr: ', arr);
-    // console.log('request: ', request);
     request.on('end', function(data) {
-      console.log('on end arr: ', arr);
       var arrParsed = JSON.parse(arr);
       arrParsed.objectId = randoGen();
-      serverData.results.push(arrParsed);
+      serverData.results.unshift(arrParsed);
+      
+      var statusCode = 201;
+      response.writeHead(statusCode, headers);
+      response.end("Thanks", statusCode);
     });
   } else {
     console.log(request.url);
