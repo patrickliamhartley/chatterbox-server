@@ -39,12 +39,36 @@ var requestHandler = function(request, response) {
   //
   // You will need to change this if you are sending something
   // other than plain text, like JSON or HTML.
-  headers['Content-Type'] = 'text/plain';
+  headers['Content-Type'] = 'application/json'; // 'text/plain';
 
   // .writeHead() writes to the request line and headers of the response,
   // which includes the status and all headers.
   response.writeHead(statusCode, headers);
+  console.log('url', request.url);
+  var fakeData = { results:[{
+    roomname: "Lobby", 
+    text: "LOL IM HAVING FUN!", 
+    username: "MrCool"
+  }]};
 
+  var stolenData = {"results":[{
+    "createdAt":"2016-08-15T23:51:47.674Z",
+    "objectId":"qt43mO7IUZ",
+    "roomname":"lobby",
+    "text":"dfsf",
+    "updatedAt":"2016-08-15T23:51:47.674Z",
+    "username":"dnf"
+  }]};
+
+  if (request.url === '/classes/messages') {
+
+    console.log('request.url is true.');
+    response.end(JSON.stringify(stolenData));
+    // response.end(JSON.stringify(fakeData));
+  } else {
+    console.log(request.url);
+    response.end('Bad request');
+  }
   // Make sure to always call response.end() - Node may not send
   // anything back to the client until you do. The string you pass to
   // response.end() will be the body of the response - i.e. what shows
@@ -52,7 +76,6 @@ var requestHandler = function(request, response) {
   //
   // Calling .end "flushes" the response's internal buffer, forcing
   // node to actually send all the data over to the client.
-  response.end('Hello, World!');
 };
 
 // These headers will allow Cross-Origin Resource Sharing (CORS).
@@ -71,3 +94,4 @@ var defaultCorsHeaders = {
   'access-control-max-age': 10 // Seconds.
 };
 
+exports.requestHandler = requestHandler;

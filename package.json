@@ -29,5 +29,10 @@
     "presets": [
       "es2015"
     ]
+  },
+  "dependencies": {
+    "node-inspector": "^0.12.8",
+    "nodemon": "^1.10.0",
+    "underscore": "^1.8.3"
   }
 }
