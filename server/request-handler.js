@@ -1,3 +1,4 @@
+var fs = require('fs');
 /*************************************************************
 
 You should implement your request handler function in this file.
@@ -11,17 +12,26 @@ this file and include it in basic-server.js so that it actually works.
 *Hint* Check out the node module documentation at http://nodejs.org/api/modules.html.
 
 **************************************************************/
+
+// fs.writeFile('donuts.html', 'Whatever.', 'utf8', function(arg) {
+//   console.log('writeFile has succeeded!', arg);
+// });
+
+// fs.readFile('donuts.html', 'utf8', function(err, data) {
+//   console.log('readFile has succeeded!', data);
+// });   
+
 var serverData = {results: [{
-  createdAt: "2016-08-15T23:51:47.674Z",
-  objectId: "qt43mO7IUZ",
-  roomname: "lobby",
-  text: "hola",
-  updatedAt: "2016-08-15T23:51:47.674Z",
-  username: "dnf"
+  createdAt: '2016-08-15T23:51:47.674Z',
+  objectId: 'qt43mO7IUZ',
+  roomname: 'lobby',
+  text: 'hola',
+  updatedAt: '2016-08-15T23:51:47.674Z',
+  username: 'dnf'
 }]};
 
 var requestHandler = function(request, response) {
-  console.log('request: ', request, 'response: ', response);
+  // console.log('request: ', request, 'response: ', response);
   // Request and Response come from node's http module.
   //
   // They include information about both the incoming request, such as
@@ -73,7 +83,23 @@ var requestHandler = function(request, response) {
   };
 
   // handle request
-  if (request.url === '/classes/messages' && request.method === 'OPTIONS') {
+  // if (request.url === '/') {
+  //   var readPage = fs.createReadStream('./index.html');
+  //   response.writeHead(200, {'Content-Type': 'text/html'});
+  //   readPage.pipe(response);
+  // }
+  if (request.url === '/' && request.method === 'GET') {
+    fs.exists('donuts.html', function(exists) {
+      if (exists) {
+        response.end('Donuts exists!!!!');
+      } else {
+        response.end('No donuts, my man.');
+      }
+    });
+    headers['Content-Type'] = 'text/html';
+    response.writeHead(200, headers);
+    // fs.createReadStream('./chatterbox-client/client/index.html').pipe(response);
+  } else if (request.url === '/classes/messages' && request.method === 'OPTIONS') {
     statusCode = 200;
     headers['Allow'] = 'HEAD,GET,PUT,DELETE,OPTIONS';
     response.writeHead(statusCode, headers);
@@ -82,7 +108,12 @@ var requestHandler = function(request, response) {
   } else if (request.url === '/classes/messages' && request.method === 'GET') {
     statusCode = 200;
     response.writeHead(statusCode, headers);
-    response.end(JSON.stringify(serverData), statusCode);
+    // response.end(JSON.stringify(serverData), statusCode);
+    var svData = fs.readFileSync('serverData.txt', 'utf8', function(err, data) {
+      console.log('here is your sv data idiot: ', data);
+    });  
+    response.end(svData, statusCode);
+    serverData = JSON.parse(svData);
   } else if (request.url === '/classes/messages' && request.method === 'POST') {
     var arr = '';
     request.on('data', function(data) { arr += data; });
@@ -95,6 +126,10 @@ var requestHandler = function(request, response) {
       var statusCode = 201;
       response.writeHead(statusCode, headers);
       response.end("Thanks", statusCode);
+      fs.writeFile('serverData.txt', JSON.stringify(serverData), 'utf8', function(arg) {
+        console.log('writeFile has succeeded!', arg);
+      });
+
     });
   } else {
     console.log(request.url);
@@ -102,6 +137,16 @@ var requestHandler = function(request, response) {
     response.writeHead(statusCode, headers);
     response.end('Bad request', statusCode);
   }
+  
+  // // initial http server attempt
+  // var readPage = fs.createReadStream('./index.html');
+  // var server = http.createServer(function(request, response) {
+  //   response.writeHead(200, {'Content-Type': 'text/html'});
+  //   readPage.pipe(response);
+  // }).listen(port, ip);
+
+
+
   // Make sure to always call response.end() - Node may not send
   // anything back to the client until you do. The string you pass to
   // response.end() will be the body of the response - i.e. what shows
